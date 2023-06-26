@@ -1,5 +1,7 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "../apis/authAPI";
 import { queryClient } from "../queryClient";
+import { AxiosError } from "axios";
 
 const authUserQuery = () => ({
   queryKey: ["user"],
@@ -13,4 +15,36 @@ export const UseAuthUser = async () => {
     queryClient.getQueriesData(query.queryKey) ??
     (await queryClient.fetchQuery(query).catch(() => undefined))
   );
+};
+
+export const UseLogin = () => {
+    const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.login,
+    onError: (error: AxiosError) => {
+      console.log(error);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.invalidateQueries(["auth"]);
+      window.location.href = "/";
+    },
+  });
+};
+
+export const UseLogout = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.logout,
+    onError: (error: AxiosError) => {
+      console.log(error);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.invalidateQueries(["auth"]);
+      window.location.href = "/login";
+    },
+  });
 };
